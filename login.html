@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExpenseTracker - Login/Register</title>
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg,#667eea,#764ba2);
+        --bg-light: #f8f9fa;
+        --card-bg: #fff;
+        --text-color: #333;
+        --shadow: rgba(0,0,0,0.1);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+        font-family:'Segoe UI', sans-serif;
+        background: var(--bg-light);
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        min-height:100vh;
+    }
+    .container {
+        background: var(--card-bg);
+        padding: 40px 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px var(--shadow);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+    h2 { margin-bottom: 20px; color: var(--text-color); }
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display:block; margin-bottom: 6px; color: var(--text-color); font-weight:600; }
+    .form-group input {
+        width:100%; padding:12px; border:2px solid #ddd; border-radius:8px; font-size:1rem;
+        transition:border 0.3s, box-shadow 0.3s;
+    }
+    .form-group input:focus { outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,0.1); }
+    .btn {
+        width:100%; padding:12px; border:none; border-radius:8px;
+        background: var(--primary-gradient); color:white; font-weight:600; font-size:1rem;
+        cursor:pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(102,126,234,0.3); }
+    .toggle-link {
+        margin-top: 15px; display:block; font-size:0.9rem; color:#667eea; cursor:pointer;
+    }
+    .hidden { display:none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="formTitle">Login</h2>
+    <form id="authForm">
+        <div class="form-group" id="nameGroup" style="display:none;">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="John Doe">
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="********" required>
+        </div>
+        <div class="form-group" id="confirmPasswordGroup" style="display:none;">
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="********">
+        </div>
+        <button type="submit" class="btn" id="submitBtn">Login</button>
+    </form>
+    <span class="toggle-link" id="toggleForm">Don't have an account? Register</span>
+</div>
+
+<script>
+let isLogin = true;
+
+const formTitle = document.getElementById('formTitle');
+const authForm = document.getElementById('authForm');
+const nameGroup = document.getElementById('nameGroup');
+const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+const submitBtn = document.getElementById('submitBtn');
+const toggleLink = document.getElementById('toggleForm');
+
+// Toggle between login and register
+toggleLink.addEventListener('click', () => {
+    isLogin = !isLogin;
+    if(isLogin){
+        formTitle.textContent = 'Login';
+        nameGroup.style.display = 'none';
+        confirmPasswordGroup.style.display = 'none';
+        submitBtn.textContent = 'Login';
+        toggleLink.textContent = "Don't have an account? Register";
+    } else {
+        formTitle.textContent = 'Register';
+        nameGroup.style.display = 'block';
+        confirmPasswordGroup.style.display = 'block';
+        submitBtn.textContent = 'Register';
+        toggleLink.textContent = "Already have an account? Login";
+    }
+});
+
+// Handle login/register
+authForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    let users = JSON.parse(localStorage.getItem('expenseTrackerUsers') || '[]');
+
+    if(isLogin){
+        // Login
+        const user = users.find(u=>u.email===email && u.password===password);
+        if(user){
+            localStorage.setItem('loggedInUser', JSON.stringify(user));
+            window.location.href = 'index.html'; // redirect to dashboard
+        } else {
+            alert('Invalid email or password');
+        }
+    } else {
+        // Register
+        if(!name){ alert('Please enter your full name'); return; }
+        if(password !== confirmPassword){ alert('Passwords do not match'); return; }
+        if(users.some(u=>u.email===email)){ alert('Email already registered'); return; }
+
+        const newUser = { name, email, password };
+        users.push(newUser);
+        localStorage.setItem('expenseTrackerUsers', JSON.stringify(users));
+        alert('Registration successful! You can now login.');
+        toggleLink.click(); // switch to login form
+    }
+});
+</script>
+
+</body>
+</html>
